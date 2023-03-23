@@ -1,9 +1,12 @@
 package lazar.jovanovic.shoppinglist;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -89,9 +93,16 @@ public class loginFragment extends Fragment implements View.OnClickListener {
 
             intent.putExtras(bundle);
             startActivity(intent);
+        }else if (user.getText().toString().isEmpty() || pass.getText().toString().isEmpty()) {
+            Log.d("LOGIN", "EMPTY");
+            //izbaci mehuric da nije dobar user ili pass
+            Toast toast = Toast.makeText(getContext(), "Username or password cannot be blank", Toast.LENGTH_SHORT);
+            toast.show();
         }else{
             Log.d("LOGIN", "UNSUCCESSFUL");
             //izbaci mehuric da nije dobar user ili pass
+            Toast toast = Toast.makeText(getContext(), "Incorrect username or password", Toast.LENGTH_SHORT);
+            toast.show();
         }
     }
 }

@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener /*implements View.OnClickListener*/ {
 
     Button bLogin_1, bRegister_1;
     LinearLayout lLinearLayout_1;
@@ -22,11 +22,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         lLinearLayout_1 = findViewById(R.id.linear_layout_1);
+
         bLogin_1 = findViewById(R.id.login_1);
         bRegister_1 = findViewById(R.id.register_1);
 
         bLogin_1.setOnClickListener(this);
         bRegister_1.setOnClickListener(this);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        lLinearLayout_1 = findViewById(R.id.linear_layout_1);
+        lLinearLayout_1.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -53,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_1, fragment);
+        fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
 
     }

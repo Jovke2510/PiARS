@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -79,7 +80,7 @@ public class registerFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-        if(!user.getText().toString().equals("") && !pass.getText().toString().equals("") && !email.getText().toString().equals("")){
+        if(!user.getText().toString().isEmpty() && !pass.getText().toString().isEmpty() && !email.getText().toString().isEmpty()){
             Log.d("REGISTER", "SUCCESSFUL");
             Intent intent = new Intent(getActivity(), WelcomeActivity.class);
 
@@ -91,6 +92,9 @@ public class registerFragment extends Fragment implements View.OnClickListener {
             startActivity(intent);
         }else{
             Log.d("REGISTER", "UNSUCCESSFUL");
+            //izbaci mehuric da nije dobar user ili pass
+            Toast toast = Toast.makeText(getContext(), "All required fields must be filled", Toast.LENGTH_SHORT);
+            toast.show();
         }
     }
 }
