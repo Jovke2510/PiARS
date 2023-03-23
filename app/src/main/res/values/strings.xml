@@ -10,4 +10,11 @@
     <string name="welcome">WELCOME</string>
     <string name="new_list">NEW LIST</string>
     <string name="see_my_lists">SEE MY LISTS</string>
+    <string name="share_list">Share list:</string>
+    <string name="naslov">NASLOV</string>
+    <string name="ok">OK</string>
+    <string name="naslov_liste">Naslov liste</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="save">SAVE</string>
 </resources>

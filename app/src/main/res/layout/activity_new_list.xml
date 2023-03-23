@@ -14,13 +14,13 @@
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="5"
-            android:hint="Naslov liste"
+            android:hint="@string/naslov_liste"
             android:id="@+id/naslov_liste"
             />
         <Button
             android:layout_width="0dp"
             android:layout_height="50dp"
-            android:text="OK"
+            android:text="@string/ok"
             android:layout_weight="1"
             android:id="@+id/naslov_ok"
             />
@@ -29,13 +29,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="NASLOV"
+        android:text="@string/naslov"
         android:id="@+id/naslov"
         />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Share list:"/>
+        android:text="@string/share_list"/>
     <RadioGroup
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -43,13 +43,22 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Yes"
+            android:text="@string/yes"
             android:id="@+id/yes_button"/>
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No"
+            android:text="@string/no"
             android:id="@+id/no_button"/>
     </RadioGroup>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/save"
+        android:layout_gravity="right"
+        android:id="@+id/save_button"
+        />
+
 
 </LinearLayout>
