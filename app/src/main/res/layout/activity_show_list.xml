@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ShowListActivity"
+    >
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="50sp"
+        android:hint="Naslov"
+        android:gravity="center"
+        android:id="@+id/sh_naslov"
+      />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <EditText
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:hint="Dodaj zadatak"
+          android:layout_weight="3"
+          android:id="@+id/task_title"
+          />
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="ADD"
+            android:layout_weight="1"
+            android:id="@+id/task_add"
+          />
+    </LinearLayout>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/task_id"
+        />
+
+
+
+
+
+
+
+  </LinearLayout>
