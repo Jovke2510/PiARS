@@ -17,4 +17,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="save">SAVE</string>
+    <string name="Naslov">Naslov</string>
+    <string name="shared">Shared</string>
 </resources>
