@@ -26,6 +26,8 @@ public class loginFragment extends Fragment implements View.OnClickListener {
     EditText user, pass;
     Button bLogin;
 
+    DbHelper dbHelper;
+    private final String DB_NAME = "register.db";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -76,6 +78,8 @@ public class loginFragment extends Fragment implements View.OnClickListener {
         pass = v.findViewById(R.id.password_1);
         bLogin = v.findViewById(R.id.login_2);
 
+        dbHelper = new DbHelper(getContext(), DB_NAME, null, 1);
+
         bLogin.setOnClickListener(this);
 
         return v;
@@ -83,7 +87,12 @@ public class loginFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-        if(user.getText().toString().equals("admin") && pass.getText().toString().equals("admin")){
+        if(user.getText().toString().isEmpty() || pass.getText().toString().isEmpty()) {
+            Log.d("LOGIN", "EMPTY");
+            //izbaci mehuric da nije dobar user ili pass
+            Toast toast = Toast.makeText(getContext(), "Username or password cannot be blank", Toast.LENGTH_SHORT);
+            toast.show();
+        }else if(dbHelper.checkLogin(user.getText().toString(), pass.getText().toString())){
             //intent
             Log.d("LOGIN", user.getText().toString());
             Intent intent = new Intent(getActivity(), WelcomeActivity.class);
@@ -93,15 +102,10 @@ public class loginFragment extends Fragment implements View.OnClickListener {
 
             intent.putExtras(bundle);
             startActivity(intent);
-        }else if (user.getText().toString().isEmpty() || pass.getText().toString().isEmpty()) {
-            Log.d("LOGIN", "EMPTY");
-            //izbaci mehuric da nije dobar user ili pass
-            Toast toast = Toast.makeText(getContext(), "Username or password cannot be blank", Toast.LENGTH_SHORT);
-            toast.show();
         }else{
             Log.d("LOGIN", "UNSUCCESSFUL");
             //izbaci mehuric da nije dobar user ili pass
-            Toast toast = Toast.makeText(getContext(), "Incorrect username or password", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(getContext(), "Invalid username or password", Toast.LENGTH_SHORT);
             toast.show();
         }
     }

@@ -41,6 +41,8 @@ public class ShowListActivity extends AppCompatActivity implements View.OnClickL
             }
         });
 
+
+
         bAdd = findViewById(R.id.task_add);
         edTaskAdd = findViewById(R.id.task_title);
         tvTitle = findViewById(R.id.sh_naslov);

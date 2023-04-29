@@ -22,6 +22,9 @@ public class registerFragment extends Fragment implements View.OnClickListener {
 
     EditText user, email, pass;
     Button bRegister;
+
+    DbHelper dbHelper;
+    private final String DB_NAME = "register.db";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -73,6 +76,8 @@ public class registerFragment extends Fragment implements View.OnClickListener {
         pass = v.findViewById(R.id.password_2);
         bRegister = v.findViewById(R.id.register_2);
 
+        dbHelper = new DbHelper(getContext(), DB_NAME, null, 1);
+
         bRegister.setOnClickListener(this);
 
         return v;
@@ -81,15 +86,22 @@ public class registerFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         if(!user.getText().toString().isEmpty() && !pass.getText().toString().isEmpty() && !email.getText().toString().isEmpty()){
-            Log.d("REGISTER", "SUCCESSFUL");
-            Intent intent = new Intent(getActivity(), WelcomeActivity.class);
+            if(dbHelper.insertRegister(user.getText().toString(), email.getText().toString(), pass.getText().toString())){
+                Log.d("REGISTER", "SUCCESSFUL");
+                Intent intent = new Intent(getActivity(), WelcomeActivity.class);
 
-            Bundle bundle = new Bundle();
-            bundle.putString("user", user.getText().toString());
+                Bundle bundle = new Bundle();
+                bundle.putString("user", user.getText().toString());
 
-            intent.putExtras(bundle);
+                intent.putExtras(bundle);
 
-            startActivity(intent);
+                startActivity(intent);
+            }else{
+                Log.d("REGISTER", "UNSUCCESSFUL");
+                //izbaci mehuric da nije dobar user ili pass
+                Toast toast = Toast.makeText(getContext(), "Email or username already used", Toast.LENGTH_SHORT);
+                toast.show();
+            }
         }else{
             Log.d("REGISTER", "UNSUCCESSFUL");
             //izbaci mehuric da nije dobar user ili pass
