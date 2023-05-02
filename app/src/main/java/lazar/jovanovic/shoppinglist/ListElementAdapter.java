@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.List;
 
 public class ListElementAdapter extends BaseAdapter {
     private Context mContext;
@@ -74,6 +75,22 @@ public class ListElementAdapter extends BaseAdapter {
 
     public void removeListElement(ListElement le){
         mListElements.remove(le);
+        notifyDataSetChanged();
+    }
+
+    /*public Boolean removeAllListElements(){
+        for(ListElement le : mListElements){
+            mListElements.remove(le);
+        }
+        notifyDataSetChanged();
+        if(mListElements.isEmpty())
+            return true;
+        return false;
+    }*/
+
+    public void updateList(List<ListElement> newList){
+        mListElements.clear();
+        mListElements.addAll(newList);
         notifyDataSetChanged();
     }
 }

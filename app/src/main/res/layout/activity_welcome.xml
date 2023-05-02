@@ -41,7 +41,6 @@
            android:layout_weight="1"
            android:backgroundTint="@color/white"
            android:textColor="@color/black"
-           android:enabled="false"
            android:id="@+id/see_lists"
            />
    </LinearLayout>
