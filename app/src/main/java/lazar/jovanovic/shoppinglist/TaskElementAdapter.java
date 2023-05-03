@@ -11,6 +11,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskElementAdapter extends BaseAdapter {
     private Context mContext;
@@ -43,6 +44,12 @@ public class TaskElementAdapter extends BaseAdapter {
         return i;
     }
 
+    public void updateTasks(List<TaskElement> itemsList) {
+        mTaskElements.clear();
+        mTaskElements.addAll(itemsList);
+        notifyDataSetChanged();
+    }
+
     private class ViewHolder{
         public TextView vhNaslov;
         public CheckBox vhChecked;
@@ -70,12 +77,18 @@ public class TaskElementAdapter extends BaseAdapter {
         vh.vhChecked.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                //ShowListActivity slA = new ShowListActivity();
+                //String listName = slA.getItemListName();
+                DbHelper dbHelper = new DbHelper(mContext, "database.db", null, 1);
+                dbHelper.updateChecked(te, b);
                 te.setmChecked(b);
 
                 if(b)
                     vh.vhNaslov.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
                 else
                     vh.vhNaslov.setPaintFlags(0);
+
+                notifyDataSetChanged();
             }
         });
 

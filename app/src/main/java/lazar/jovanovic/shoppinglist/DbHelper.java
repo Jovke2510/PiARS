@@ -25,6 +25,12 @@ public class DbHelper extends SQLiteOpenHelper {
     public static final String COLUMN_LIST_CREATOR = "Creator";
     public static final String COLUMN_LIST_SHARED = "Shared";
 
+    //ShowListActivity
+    private final String TABLE_NAME2 = "ITEMS";
+    static final String COLUMN_ITEMS_NAME = "Name";
+    static final String COLUMN_ITEMS_LIST_NAME = "List_Name";
+    static final String COLUMN_ITEMS_CHECKED = "Checked";
+    static final String COLUMN_ITEMS_ID = "ID";
 
     public DbHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
@@ -44,6 +50,12 @@ public class DbHelper extends SQLiteOpenHelper {
                 COLUMN_LIST_CREATOR + " TEXT, " +
                 COLUMN_LIST_SHARED + " TEXT);");
 
+        //ShowListActivity
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_NAME2 +
+                " (" + COLUMN_ITEMS_NAME + " TEXT, " +
+                COLUMN_ITEMS_LIST_NAME + " TEXT, " +
+                COLUMN_ITEMS_CHECKED + " TEXT, " +
+                COLUMN_ITEMS_ID + " TEXT);");
     }
 
     @Override
@@ -79,10 +91,14 @@ public class DbHelper extends SQLiteOpenHelper {
                 null, null, null);
 
         if(cursorUsername.getCount() == 0 && cursorEmail.getCount() == 0){
+            cursorUsername.close();
+            cursorEmail.close();
             close();
             return true;
         }
 
+        cursorEmail.close();
+        cursorUsername.close();
         close();
         return false;
     }
@@ -102,15 +118,18 @@ public class DbHelper extends SQLiteOpenHelper {
                     cursor.getColumnIndexOrThrow(COLUMN_PASSWORD));
             if(storedPassword.equals(password)){
                 close();
+                cursor.close();
                 return true;
             }
         }
         close();
+        cursor.close();
         return false;
     }
 
     //WelcomeActivity methods
     public void findSharedLists(List<ListElement> sharedLists){
+        sharedLists.clear();
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NAME1,
@@ -141,6 +160,7 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     public Boolean findUserLists(List<ListElement> userLists, String username){
+        userLists.clear();
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NAME1,
@@ -152,13 +172,13 @@ public class DbHelper extends SQLiteOpenHelper {
         if(cursor.getCount() == 0){
             Log.d("DBHELPER", "LIST IS EMPTY");
             close();
+            cursor.close();
             return false;
         }
 
         while(cursor.moveToNext()){
             String listName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_NAME));
             String listShared = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_SHARED));
-            Log.d("DBHELPER", "listCreator: " + listName + " listShared: " + listShared);
             Boolean isListShared;
             if (listShared.equals("yes"))
                 isListShared = true;
@@ -166,13 +186,11 @@ public class DbHelper extends SQLiteOpenHelper {
                 isListShared = false;
             else
                 isListShared = null;
-            Log.d("DBHELPER", "isListShared: " + isListShared.toString());
             ListElement le = new ListElement(listName, isListShared);
-            Log.d("DBHELPER", "le.getCreator: " + le.getmNaslov() +
-                    " le.getShared: " + le.getmShared().toString());
             userLists.add(le);
         }
         close();
+        cursor.close();
         return true;
     }
 
@@ -203,10 +221,109 @@ public class DbHelper extends SQLiteOpenHelper {
 
         if(cursor.getCount() == 0){
             close();
+            cursor.close();
             return true;
         }
 
         close();
+        cursor.close();
         return false;
+    }
+
+    public TaskElement insertTask(String item_name, String list_name, String checked, String id) {
+        if(!checkItemName(id))
+            return null;
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_ITEMS_NAME, item_name);
+        contentValues.put(COLUMN_ITEMS_LIST_NAME, list_name);
+        contentValues.put(COLUMN_ITEMS_CHECKED, checked);
+        contentValues.put(COLUMN_ITEMS_ID, id);
+
+        db.insert(TABLE_NAME2, null, contentValues);
+        close();
+        boolean isChecked = checked.equals("yes");
+
+        return new TaskElement(item_name, isChecked, list_name);
+    }
+
+    private boolean checkItemName(String id) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_NAME2,
+                new String[] {COLUMN_ITEMS_ID},
+                COLUMN_ITEMS_ID + " =?",
+                new String[] {id},
+                null, null, null);
+
+        if(cursor.getCount() == 0){
+            close();
+            cursor.close();
+            return true;
+        }
+        close();
+        cursor.close();
+        return false;
+    }
+
+    public boolean findItems(List<TaskElement> itemsList, String stNaslov) {
+        itemsList.clear();
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_NAME2,
+                new String[] {COLUMN_ITEMS_NAME, COLUMN_ITEMS_CHECKED},
+                COLUMN_ITEMS_LIST_NAME + " = ?",
+                new String[] {stNaslov},
+                null, null, null);
+
+        if(cursor.getCount() == 0){
+            Log.d("DBHELPER", "NO TASK ITEMS");
+            close();
+            cursor.close();
+            return false;
+        }
+
+        while (cursor.moveToNext()){
+            String name = cursor.getString(
+                    cursor.getColumnIndexOrThrow(COLUMN_ITEMS_NAME));
+            String checked = cursor.getString(
+                    cursor.getColumnIndexOrThrow(COLUMN_ITEMS_CHECKED));
+
+            boolean isChecked = checked.equals("yes");
+
+            TaskElement te = new TaskElement(name, isChecked, stNaslov);
+            itemsList.add(te);
+        }
+        close();
+        cursor.close();
+        return true;
+    }
+
+    public void removeItem(TaskElement item, String stNaslov) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        String itemID = item.getmNaslov() + stNaslov;
+        Log.d("DEHELPER", "String koji glumi id: " + itemID);
+        db.delete(TABLE_NAME2,
+                COLUMN_ITEMS_ID +" =?",
+                new String[] {itemID});
+
+        close();
+    }
+
+    public void updateChecked(TaskElement te, boolean isChecked) {
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_ITEMS_CHECKED, isChecked ? "yes" : "no");
+
+        String whereClause = COLUMN_ITEMS_NAME + " =? AND " +
+                COLUMN_ITEMS_LIST_NAME + " = ?";
+
+        db.update(TABLE_NAME2, contentValues, whereClause,
+                new String[] {te.getmNaslov(), te.getmItemListName()});
+
+        close();
     }
 }

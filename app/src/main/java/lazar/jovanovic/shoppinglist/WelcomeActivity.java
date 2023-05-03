@@ -54,6 +54,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         userLists = new ArrayList<>();
         dbHelper.findSharedLists(sharedLists);
         if(!sharedLists.isEmpty()){
+            seeMyListsPressed = 1;
             updateList(sharedLists, userLists, seeMyListsPressed);
         }
 
@@ -93,32 +94,6 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         bSeeMyLists = findViewById(R.id.see_lists);
         bSeeMyLists.setOnClickListener(this);
     }
-
-    /*private void addSharedListToAdapter(List<String> sharedLists, Boolean shared) {
-        for(String listName : sharedLists){
-            leAdapter.addListElement(new ListElement(listName, shared));
-        }
-    }
-
-    private void addUserListToAdapter(String userListsCreator, Boolean userListsShared) {
-        leAdapter.addListElement(new ListElement(userListsCreator, userListsShared));
-    }
-
-    private void removeListFromAdapter(List<String> sharedLists, List<ListElement> userLists, int seeMyListsPressed){
-        leAdapter.removeAllListElements();
-        if(seeMyListsPressed == 1){
-            //1 for shared lists -1 for user lists
-            addSharedListToAdapter(sharedLists, true);
-        }else if(seeMyListsPressed == -1){
-            //pull string and bool value from userLists
-            for(ListElement le : userLists){
-                String userListsCreator = le.getmNaslov();
-                Boolean userListsShared = le.getmShared();
-                addUserListToAdapter(userListsCreator, userListsShared);
-            }
-
-        }
-    }*/
 
     @Override
     public void onClick(View view) {
@@ -163,6 +138,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                     break;
                 }
                 Log.d("WELCOME_ACTIVITY", "SEE_LISTS PRESSED");
+                Log.d("WELOCME MRSH", "USER LISTS NUMBER: " + String.valueOf(
+                        userLists.size()));
                 seeMyListsPressed *= (-1);
                 updateList(sharedLists, userLists, seeMyListsPressed);
 
