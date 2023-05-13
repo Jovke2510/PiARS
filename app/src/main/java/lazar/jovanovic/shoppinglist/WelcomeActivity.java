@@ -34,6 +34,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     private Bundle bundle;
     private int seeMyListsPressed = 1;
     private List<ListElement> userLists;
+    private List<ListElement> namedLists;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +53,22 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         //funkcija koja prolazi kroz bazu i vraca sve liste koje ulogovani korisnik ima i one koje se dele
         sharedLists = new ArrayList<>();
         userLists = new ArrayList<>();
-        dbHelper.findSharedLists(sharedLists);
+        /*dbHelper.findSharedLists(sharedLists);
         if(!sharedLists.isEmpty()){
             seeMyListsPressed = 1;
             updateList(sharedLists, userLists, seeMyListsPressed);
+        }*/
+
+        namedLists = new ArrayList<>();
+        String nameList = "lista25";
+        if(!dbHelper.findListsNamed(namedLists, nameList)){
+            Toast toast = Toast.makeText(this, "No lists named " + nameList, Toast.LENGTH_SHORT);
+            toast.show();
+        }else{
+            if(!namedLists.isEmpty()){
+                seeMyListsPressed = 1;
+                updateList(namedLists, userLists, seeMyListsPressed);
+            }
         }
 
         list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -141,7 +154,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 Log.d("WELOCME MRSH", "USER LISTS NUMBER: " + String.valueOf(
                         userLists.size()));
                 seeMyListsPressed *= (-1);
-                updateList(sharedLists, userLists, seeMyListsPressed);
+                updateList(/*sharedLists*/namedLists, userLists, seeMyListsPressed);
 
                 //pull string list from userLists
                 //removeListFromAdapter(sharedLists, userLists, seeMyListsPressed);

@@ -326,4 +326,41 @@ public class DbHelper extends SQLiteOpenHelper {
 
         close();
     }
+
+    public boolean findListsNamed(List<ListElement> namedLists, String lista25) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_NAME1,
+                new String[] {COLUMN_LIST_NAME, COLUMN_LIST_SHARED},
+                COLUMN_LIST_NAME + " =?",
+                new String[] {lista25},
+                null, null, null);
+
+        if(cursor.getCount() == 0){
+            cursor.close();
+            close();
+            return false;
+        }
+
+        while(cursor.moveToNext()){
+            String listName = cursor.getString(
+                    cursor.getColumnIndexOrThrow(COLUMN_LIST_NAME));
+            String shared = cursor.getString(
+                    cursor.getColumnIndexOrThrow(COLUMN_LIST_SHARED));
+            Boolean listShared;
+
+            if(shared.equals("yes"))
+                listShared = true;
+            else if (shared.equals("no"))
+                listShared = false;
+            else
+                listShared = null;
+
+            namedLists.add(new ListElement(listName, listShared));
+        }
+
+        cursor.close();
+        close();
+        return true;
+    }
 }
