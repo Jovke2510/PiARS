@@ -36,6 +36,25 @@
           />
     </LinearLayout>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/home"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:id="@+id/home_button5"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/refresh"
+        android:backgroundTint="@color/purple_200"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        android:id="@+id/refresh_button"
+        />
+
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

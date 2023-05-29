@@ -13,6 +13,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link registerFragment#newInstance} factory method to
@@ -21,9 +26,12 @@ import android.widget.Toast;
 public class registerFragment extends Fragment implements View.OnClickListener {
 
     EditText user, email, pass;
-    Button bRegister;
+    Button bRegister, bHome;
 
     DbHelper dbHelper;
+    HttpHelper httpHelper;
+    int flag;
+    public static String POST_REGISTER = "http://192.168.5.106:3000/users";
     private final String DB_NAME = "database.db";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -75,38 +83,97 @@ public class registerFragment extends Fragment implements View.OnClickListener {
         email = v.findViewById(R.id.email_1);
         pass = v.findViewById(R.id.password_2);
         bRegister = v.findViewById(R.id.register_2);
+        bHome = v.findViewById(R.id.home_button2);
 
         dbHelper = new DbHelper(getContext(), DB_NAME, null, 1);
+        httpHelper = new HttpHelper();
 
         bRegister.setOnClickListener(this);
+        bHome.setOnClickListener(this);
 
         return v;
     }
 
     @Override
     public void onClick(View view) {
-        if(!user.getText().toString().isEmpty() && !pass.getText().toString().isEmpty() && !email.getText().toString().isEmpty()){
-            if(dbHelper.insertRegister(user.getText().toString(), email.getText().toString(), pass.getText().toString())){
-                Log.d("REGISTER", "SUCCESSFUL");
-                Intent intent = new Intent(getActivity(), WelcomeActivity.class);
+        switch (view.getId()){
+            case R.id.register_2:{
+                if(!user.getText().toString().isEmpty() && !pass.getText().toString().isEmpty() && !email.getText().toString().isEmpty()){
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("username", user.getText().toString());
+                                jsonObject.put("password", pass.getText().toString());
+                                jsonObject.put("email", email.getText().toString());
+                                Log.d("REGISTER", "URL VALUE: " + POST_REGISTER);
+                                flag = httpHelper.postJSONObjectFromURL(POST_REGISTER, jsonObject);
+                                Log.d("REGISTER", "FLAG VALUE " + String.valueOf(flag));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
 
-                Bundle bundle = new Bundle();
-                bundle.putString("user", user.getText().toString());
+                            if(flag == 200 || flag == 201){
+                                if (dbHelper.insertRegister(user.getText().toString(), email.getText().toString(), pass.getText().toString())) {
+                                    Log.d("REGISTER", "SUCCESSFUL");
+                                    Intent intent = new Intent(getActivity(), WelcomeActivity.class);
 
-                intent.putExtras(bundle);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("user", user.getText().toString());
 
-                startActivity(intent);
-            }else{
-                Log.d("REGISTER", "UNSUCCESSFUL");
-                //izbaci mehuric da nije dobar user ili pass
-                Toast toast = Toast.makeText(getContext(), "Email or username already used", Toast.LENGTH_SHORT);
-                toast.show();
+                                    intent.putExtras(bundle);
+
+                                    startActivity(intent);
+                                } else {
+                                    Log.d("REGISTER", "UNSUCCESSFUL");
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getActivity(), "Registration not successful!", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            }else if(flag == -1){
+                                Log.d("REGISTER", "UNSUCCESSFUL");
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }else{
+                                Log.d("REGISTER", "UNSUCCESSFUL");
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity(), "Username or email invalid/in use", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        }
+                    }).start();
+                }else{
+                    Log.d("REGISTER", "UNSUCCESSFUL");
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getActivity(), "Non of the fields can be empty", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                break;
             }
-        }else{
-            Log.d("REGISTER", "UNSUCCESSFUL");
-            //izbaci mehuric da nije dobar user ili pass
-            Toast toast = Toast.makeText(getContext(), "All required fields must be filled", Toast.LENGTH_SHORT);
-            toast.show();
+            case R.id.home_button2:{
+                Intent intent = new Intent(getActivity(), MainActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+                break;
+            }
         }
+
+
     }
 }

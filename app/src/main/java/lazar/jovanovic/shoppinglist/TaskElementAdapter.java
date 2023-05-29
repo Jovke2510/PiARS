@@ -17,6 +17,8 @@ public class TaskElementAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<TaskElement> mTaskElements;
 
+    public boolean checked;
+
     public TaskElementAdapter(Context context) {
         this.mContext = context;
         mTaskElements = new ArrayList<TaskElement>();
@@ -82,7 +84,7 @@ public class TaskElementAdapter extends BaseAdapter {
                 DbHelper dbHelper = new DbHelper(mContext, "database.db", null, 1);
                 dbHelper.updateChecked(te, b);
                 te.setmChecked(b);
-
+                checked = b;
                 if(b)
                     vh.vhNaslov.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
                 else
@@ -106,5 +108,9 @@ public class TaskElementAdapter extends BaseAdapter {
     public void removeTaskElements(TaskElement te){
         mTaskElements.remove(te);
         notifyDataSetChanged();
+    }
+
+    public boolean getChecked(){
+        return checked;
     }
 }

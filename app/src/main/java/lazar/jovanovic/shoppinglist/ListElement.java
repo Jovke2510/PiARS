@@ -24,4 +24,6 @@ public class ListElement {
     public void setmShared(Boolean mShared) {
         this.mShared = mShared;
     }
+
+
 }

@@ -128,7 +128,7 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     //WelcomeActivity methods
-    public void findSharedLists(List<ListElement> sharedLists){
+    public boolean findSharedLists(List<ListElement> sharedLists){
         sharedLists.clear();
         SQLiteDatabase db = getReadableDatabase();
 
@@ -137,6 +137,13 @@ public class DbHelper extends SQLiteOpenHelper {
                 COLUMN_LIST_SHARED + " =?",
                 new String[] {"yes"},
                 null, null, null);
+
+        if(cursor.getCount() == 0){
+            Log.d("DBHELPER", "LIST IS EMPTY");
+            close();
+            cursor.close();
+            return false;
+        }
 
         while(cursor.moveToNext()){
             String listName = cursor.getString(
@@ -157,6 +164,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
         cursor.close();
         close();
+        return true;
     }
 
     public Boolean findUserLists(List<ListElement> userLists, String username){
@@ -228,6 +236,39 @@ public class DbHelper extends SQLiteOpenHelper {
         close();
         cursor.close();
         return false;
+    }
+
+    public String findListCreator(String name){
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor cursor = db.query(TABLE_NAME1,
+                new String[] {COLUMN_LIST_CREATOR},
+                COLUMN_LIST_NAME + " =?",
+                new String[] {name},
+                null, null, null);
+
+        if(cursor.getCount() == 0){
+            cursor.close();
+            close();
+            return "";
+        }
+
+        cursor.moveToFirst();
+        String creator = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_CREATOR));
+
+        cursor.close();
+        close();
+        return creator;
+    }
+    public void removeList(String stNaslov){
+        SQLiteDatabase db = getWritableDatabase();
+
+        Log.d("DEHELPER", stNaslov);
+        db.delete(TABLE_NAME1,
+                COLUMN_LIST_NAME +" =?",
+                new String[] {stNaslov});
+
+        close();
     }
 
     public TaskElement insertTask(String item_name, String list_name, String checked, String id) {

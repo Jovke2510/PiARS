@@ -43,7 +43,27 @@
            android:textColor="@color/black"
            android:id="@+id/see_lists"
            />
+       <Button
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:text="@string/see_shared_lists"
+           android:layout_weight="1"
+           android:backgroundTint="@color/white"
+           android:textColor="@color/black"
+           android:id="@+id/see_shared_lists"
+           />
    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/home"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/white"
+        android:id="@+id/home_button3"
+        />
 
    <ListView
        android:layout_width="match_parent"

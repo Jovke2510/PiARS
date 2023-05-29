@@ -16,6 +16,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link loginFragment#newInstance} factory method to
@@ -24,9 +29,12 @@ import android.widget.Toast;
 public class loginFragment extends Fragment implements View.OnClickListener {
 
     EditText user, pass;
-    Button bLogin;
+    Button bLogin, bHome;
 
     DbHelper dbHelper;
+    HttpHelper httpHelper;
+    public static String POST_LOGIN = "http://192.168.5.106:3000/login";
+    int flag;
     private final String DB_NAME = "database.db";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -77,36 +85,93 @@ public class loginFragment extends Fragment implements View.OnClickListener {
         user = v.findViewById(R.id.username_1);
         pass = v.findViewById(R.id.password_1);
         bLogin = v.findViewById(R.id.login_2);
+        bHome = v.findViewById(R.id.home_button1);
 
         dbHelper = new DbHelper(getContext(), DB_NAME, null, 1);
+        httpHelper = new HttpHelper();
 
         bLogin.setOnClickListener(this);
+        bHome.setOnClickListener(this);
+
 
         return v;
     }
 
     @Override
     public void onClick(View view) {
-        if(user.getText().toString().isEmpty() || pass.getText().toString().isEmpty()) {
-            Log.d("LOGIN", "EMPTY");
-            //izbaci mehuric da nije dobar user ili pass
-            Toast toast = Toast.makeText(getContext(), "Username or password cannot be blank", Toast.LENGTH_SHORT);
-            toast.show();
-        }else if(dbHelper.checkLogin(user.getText().toString(), pass.getText().toString())){
-            //intent
-            Log.d("LOGIN", user.getText().toString());
-            Intent intent = new Intent(getActivity(), WelcomeActivity.class);
+        switch (view.getId()){
+            case R.id.login_2:{
+                if(!user.getText().toString().isEmpty() || !pass.getText().toString().isEmpty()) {
+                    if(dbHelper.checkLogin(user.getText().toString(), pass.getText().toString())){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    JSONObject jsonObject = new JSONObject();
+                                    jsonObject.put("username", user.getText().toString());
+                                    jsonObject.put("password", pass.getText().toString());
+                                    Log.d("LOGIN", "URL VALUE: " + POST_LOGIN);
+                                    flag = httpHelper.postJSONObjectFromURL(POST_LOGIN, jsonObject);
+                                    Log.d("LOGIN", "FLAG VALUE " + String.valueOf(flag));
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
 
-            Bundle bundle = new Bundle();
-            bundle.putString("user", user.getText().toString());
+                                if(flag == 201 || flag == 200){
+                                    //intent
+                                    Log.d("LOGIN", user.getText().toString());
+                                    Intent intent = new Intent(getActivity(), WelcomeActivity.class);
 
-            intent.putExtras(bundle);
-            startActivity(intent);
-        }else{
-            Log.d("LOGIN", "UNSUCCESSFUL");
-            //izbaci mehuric da nije dobar user ili pass
-            Toast toast = Toast.makeText(getContext(), "Invalid username or password", Toast.LENGTH_SHORT);
-            toast.show();
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("user", user.getText().toString());
+
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                }else if(flag == -1){
+                                    Log.d("LOGIN", "UNSUCCESSFUL");
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }else{
+                                    Log.d("LOGIN", "UNSUCCESSFUL");
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getActivity(), "Username already in use!", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            }
+                        }).start();
+                    }else{
+                        Log.d("LOGIN", "UNSUCCESSFUL");
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getActivity(), "Login not successful!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }else{
+                    Log.d("LOGIN", "EMPTY");
+                    //izbaci mehuric da nije dobar user ili pass
+                    Toast toast = Toast.makeText(getContext(), "Username or password cannot be blank", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                break;
+            } case R.id.home_button1:{
+                Log.d("LOGIN_FRAGMENT", "PRESSED THE HOME BUTTON");
+                Intent intent = new Intent(getActivity(), MainActivity.class);
+                startActivity(intent);
+                getActivity().finish();
+                break;
+            }
         }
+
     }
 }
