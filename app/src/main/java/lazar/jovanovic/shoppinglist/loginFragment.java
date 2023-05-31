@@ -142,7 +142,7 @@ public class loginFragment extends Fragment implements View.OnClickListener {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(getActivity(), "Username already in use!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getActivity(), "Username already in use or no user!", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                             }

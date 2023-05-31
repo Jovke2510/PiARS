@@ -141,28 +141,32 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 ListElement le = (ListElement) leAdapter.getItem(i);
                 creator = null;
 
-                CountDownLatch latch = new CountDownLatch(1);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Log.d("WELCOME_ACTIVITY", "NASLOV LISTE: " + le.getmNaslov());
-                            creator = httpHelper.findListCreator(le.getmNaslov(), BASE_URL);
-                            Log.d("WELCOME_ACTIVITY", "CREATOR: " + creator);
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        } finally {
-                            latch.countDown();
+                if(le.getmShared()){
+                    CountDownLatch latch = new CountDownLatch(1);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Log.d("WELCOME_ACTIVITY", "NASLOV LISTE: " + le.getmNaslov());
+                                creator = httpHelper.findListCreator(le.getmNaslov(), BASE_URL);
+                                Log.d("WELCOME_ACTIVITY", "CREATOR: " + creator);
+                            } catch (JSONException e) {
+                                throw new RuntimeException(e);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            } finally {
+                                latch.countDown();
+                            }
                         }
-                    }
-                }).start();
+                    }).start();
 
-                try{
-                    latch.await();
-                }catch (InterruptedException e){
-                    e.printStackTrace();
+                    try{
+                        latch.await();
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                }else{
+                    creator = user;
                 }
 
                 Log.d("WELCOME_ACTIVITY", "CREATOR: " + creator);
