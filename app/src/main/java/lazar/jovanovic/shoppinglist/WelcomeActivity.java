@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class WelcomeActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -35,21 +36,25 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
     DbHelper dbHelper;
     private final String DB_NAME = "database.db";
     HttpHelper httpHelper;
-    public static String BASE_URL = "http://192.168.5.106:3000/lists";
-    public static String DELETE_LIST = "";
+    public String BASE_URL;
+    public static String DELETE_LIST;
     private List<ListElement> sharedLists;
     private String user;
     private Bundle bundle;
     private int seeMyListsPressed = 1;
     private List<ListElement> userLists;
-    //private List<ListElement> namedLists;
+    private List<ListElement> httpLists;
     private boolean flag;
     private Button bSeeSharedLists;
+
+    private String creator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+
+        BASE_URL = getString(R.string.BASE_IP) + ":3000/lists";
 
         list = findViewById(R.id.lists);
         leAdapter = new ListElementAdapter(this);
@@ -70,28 +75,18 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
         sharedLists = new ArrayList<>();
         userLists = new ArrayList<>();
         dbHelper.findUserLists(userLists, user);
+
         if(!userLists.isEmpty()){
             seeMyListsPressed = -1;
             updateList(sharedLists, userLists, seeMyListsPressed);
         }
 
-        /*namedLists = new ArrayList<>();
-        String nameList = "lista25";
-        if(!dbHelper.findListsNamed(namedLists, nameList)){
-            Toast toast = Toast.makeText(this, "No lists named " + nameList, Toast.LENGTH_SHORT);
-            toast.show();
-        }else{
-            if(!namedLists.isEmpty()){
-                seeMyListsPressed = 1;
-                updateList(namedLists, userLists, seeMyListsPressed);
-            }
-        }*/
-
         list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String listName = ((ListElement) leAdapter.getItem(i)).getmNaslov();
-                String creator = bundle.getString("user", "Default");
+                String creator =  ((ListElement) leAdapter.getItem(i)).getmUsername();/*bundle.getString("user", "Default");*/
+                Boolean shared = (((ListElement) leAdapter.getItem(i)).getmShared());
                 DELETE_LIST = BASE_URL + "/" + creator + "/" + listName + "/";
                 if(((ListElement) leAdapter.getItem(i)).getmShared()){
                     new Thread(new Runnable() {
@@ -112,7 +107,8 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        dbHelper.removeList(((ListElement) leAdapter.getItem(i)).getmNaslov());
+                                        if(user.equals(creator))
+                                            dbHelper.removeList(((ListElement) leAdapter.getItem(i)).getmNaslov());
                                         leAdapter.removeListElement((ListElement) leAdapter.getItem(i));
                                         Toast.makeText(getApplicationContext(), "Delete successful", Toast.LENGTH_SHORT).show();
                                     }
@@ -143,14 +139,35 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 //Go to the new activity
                 //user iz bundla je onaj koji je ulogovan
                 ListElement le = (ListElement) leAdapter.getItem(i);
-                String creator = dbHelper.findListCreator(le.getmNaslov());
+                creator = null;
+
+                CountDownLatch latch = new CountDownLatch(1);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Log.d("WELCOME_ACTIVITY", "NASLOV LISTE: " + le.getmNaslov());
+                            creator = httpHelper.findListCreator(le.getmNaslov(), BASE_URL);
+                            Log.d("WELCOME_ACTIVITY", "CREATOR: " + creator);
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        } finally {
+                            latch.countDown();
+                        }
+                    }
+                }).start();
+
+                try{
+                    latch.await();
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+
                 Log.d("WELCOME_ACTIVITY", "CREATOR: " + creator);
                 Log.d("WELCOME_ACTIVITY", "USER: " + user);
-                boolean diff_creator;
-                if(creator.equals(user))
-                    diff_creator = false;
-                else
-                    diff_creator = true;
+                boolean diff_creator = !creator.equals(user);
 
                 Intent intent = new Intent(WelcomeActivity.this, ShowListActivity.class);
 
@@ -216,11 +233,13 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             }
             case R.id.see_lists:{
-                if(!dbHelper.findUserLists(userLists, user)){
+                dbHelper.findUserLists(userLists, user);
+                if(userLists.isEmpty()){
                     Toast toast = Toast.makeText(this, "No user lists", Toast.LENGTH_SHORT);
                     toast.show();
                     break;
                 }
+
                 Log.d("WELCOME_ACTIVITY", "SEE_LISTS PRESSED");
                 Log.d("WELOCME MRSH", "USER LISTS NUMBER: " + String.valueOf(
                         userLists.size()));
@@ -230,6 +249,7 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             }
             case R.id.see_shared_lists:{
+                httpLists = new ArrayList<>();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -246,10 +266,10 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                                     }
                                 });
                             }
-                            List<ListElement> httpLists = new ArrayList<>();
+
                             for(int i = 0; i < jsonArray.length(); i++){
                                 jsonObject = jsonArray.getJSONObject(i);
-                                httpLists.add(new ListElement(jsonObject.getString("name"), jsonObject.getBoolean("shared")));
+                                httpLists.add(new ListElement(jsonObject.getString("name"), jsonObject.getBoolean("shared"), jsonObject.getString("creator")));
                             }
 
                             runOnUiThread(new Runnable() {
@@ -266,14 +286,9 @@ public class WelcomeActivity extends AppCompatActivity implements View.OnClickLi
                         }
                     }
                 }).start();
-                /*if(!dbHelper.findSharedLists(sharedLists)){
-                    Toast toast = Toast.makeText(this, "No shared lists", Toast.LENGTH_SHORT);
-                    toast.show();
-                    break;
-                }*/
-                Log.d("WELCOME_ACTIVITY", "SEE_LISTS PRESSED");
-                Log.d("WELOCME MRSH", "USER LISTS NUMBER: " + String.valueOf(
-                        userLists.size()));
+                Log.d("WELCOME_ACTIVITY", "SHARED_LISTS PRESSED");
+                Log.d("WELOCME MRSH", "SHARED LISTS NUMBER: " + String.valueOf(
+                        httpLists.size()));
                 break;
             }
             case R.id.home_button3:{

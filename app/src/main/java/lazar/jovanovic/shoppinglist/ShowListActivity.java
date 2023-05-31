@@ -27,7 +27,7 @@ import java.util.List;
 
 public class ShowListActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public static String POST_TASKS = "http://192.168.5.106:3000/tasks";
+    public String POST_TASKS;
     private ListView lvTasks;
     private TaskElementAdapter teAdapter;
     private Button bAdd, bRefresh, bHome;
@@ -41,15 +41,19 @@ public class ShowListActivity extends AppCompatActivity implements View.OnClickL
     private List<TaskElement> itemsList;
     private int flag;
     private boolean flag2;
-    public static String GET_TASKS = "http://192.168.119.190:3000/tasks";
+    public static String GET_TASKS;
     public static String DELETE_LIST = "";
-    public static String BASE_URL = "http://192.168.119.190:3000/tasks";
+    public static String BASE_URL;
     private String Id = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_list);
+
+        POST_TASKS = getString(R.string.BASE_IP) + ":3000/tasks";
+        GET_TASKS = getString(R.string.BASE_IP) + ":3000/tasks";
+        BASE_URL = getString(R.string.BASE_IP) + ":3000/tasks";
 
         lvTasks = findViewById(R.id.task_id);
         teAdapter = new TaskElementAdapter(this);

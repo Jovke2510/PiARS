@@ -33,7 +33,7 @@ public class loginFragment extends Fragment implements View.OnClickListener {
 
     DbHelper dbHelper;
     HttpHelper httpHelper;
-    public static String POST_LOGIN = "http://192.168.5.106:3000/login";
+    public String POST_LOGIN;
     int flag;
     private final String DB_NAME = "database.db";
     // TODO: Rename parameter arguments, choose names that match
@@ -79,6 +79,7 @@ public class loginFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        POST_LOGIN = getString(R.string.BASE_IP) + ":3000/login";
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_login, container, false);
 
@@ -102,61 +103,51 @@ public class loginFragment extends Fragment implements View.OnClickListener {
         switch (view.getId()){
             case R.id.login_2:{
                 if(!user.getText().toString().isEmpty() || !pass.getText().toString().isEmpty()) {
-                    if(dbHelper.checkLogin(user.getText().toString(), pass.getText().toString())){
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    JSONObject jsonObject = new JSONObject();
-                                    jsonObject.put("username", user.getText().toString());
-                                    jsonObject.put("password", pass.getText().toString());
-                                    Log.d("LOGIN", "URL VALUE: " + POST_LOGIN);
-                                    flag = httpHelper.postJSONObjectFromURL(POST_LOGIN, jsonObject);
-                                    Log.d("LOGIN", "FLAG VALUE " + String.valueOf(flag));
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-
-                                if(flag == 201 || flag == 200){
-                                    //intent
-                                    Log.d("LOGIN", user.getText().toString());
-                                    Intent intent = new Intent(getActivity(), WelcomeActivity.class);
-
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("user", user.getText().toString());
-
-                                    intent.putExtras(bundle);
-                                    startActivity(intent);
-                                }else if(flag == -1){
-                                    Log.d("LOGIN", "UNSUCCESSFUL");
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                }else{
-                                    Log.d("LOGIN", "UNSUCCESSFUL");
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Toast.makeText(getActivity(), "Username already in use!", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                }
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("username", user.getText().toString());
+                                jsonObject.put("password", pass.getText().toString());
+                                Log.d("LOGIN", "URL VALUE: " + POST_LOGIN);
+                                flag = httpHelper.postJSONObjectFromURL(POST_LOGIN, jsonObject);
+                                Log.d("LOGIN", "FLAG VALUE " + String.valueOf(flag));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
-                        }).start();
-                    }else{
-                        Log.d("LOGIN", "UNSUCCESSFUL");
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getActivity(), "Login not successful!", Toast.LENGTH_SHORT).show();
+
+                            if(flag == 201 || flag == 200){
+                                //intent
+                                Log.d("LOGIN", user.getText().toString());
+                                Intent intent = new Intent(getActivity(), WelcomeActivity.class);
+
+                                Bundle bundle = new Bundle();
+                                bundle.putString("user", user.getText().toString());
+
+                                intent.putExtras(bundle);
+                                startActivity(intent);
+                            }else if(flag == -1){
+                                Log.d("LOGIN", "UNSUCCESSFUL");
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity(), "Connection failed", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }else{
+                                Log.d("LOGIN", "UNSUCCESSFUL");
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getActivity(), "Username already in use!", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                             }
-                        });
-                    }
+                        }
+                    }).start();
                 }else{
                     Log.d("LOGIN", "EMPTY");
                     //izbaci mehuric da nije dobar user ili pass

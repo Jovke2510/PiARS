@@ -1,12 +1,14 @@
 package lazar.jovanovic.shoppinglist;
 
 public class ListElement {
+    private final String mUsername;
     private String mNaslov;
     private Boolean mShared;
 
-    public ListElement(String mNaslov, Boolean mShared) {
+    public ListElement(String mNaslov, Boolean mShared, String mUsername) {
         this.mNaslov = mNaslov;
         this.mShared = mShared;
+        this.mUsername = mUsername;
     }
 
     public String getmNaslov() {
@@ -25,5 +27,7 @@ public class ListElement {
         this.mShared = mShared;
     }
 
-
+    public String getmUsername() {
+        return mUsername;
+    }
 }

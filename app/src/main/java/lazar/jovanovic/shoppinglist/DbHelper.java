@@ -133,7 +133,7 @@ public class DbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NAME1,
-                new String[] {COLUMN_LIST_NAME, COLUMN_LIST_SHARED},
+                null,
                 COLUMN_LIST_SHARED + " =?",
                 new String[] {"yes"},
                 null, null, null);
@@ -150,6 +150,8 @@ public class DbHelper extends SQLiteOpenHelper {
                     cursor.getColumnIndexOrThrow(COLUMN_LIST_NAME));
             String shared = cursor.getString(
                     cursor.getColumnIndexOrThrow(COLUMN_LIST_SHARED));
+            String listUsername = cursor.getString(
+                    cursor.getColumnIndexOrThrow(COLUMN_LIST_CREATOR));
             Boolean listShared;
 
             if(shared.equals("yes"))
@@ -159,7 +161,7 @@ public class DbHelper extends SQLiteOpenHelper {
             else
                 listShared = null;
 
-            sharedLists.add(new ListElement(listName, listShared));
+            sharedLists.add(new ListElement(listName, listShared, listUsername));
         }
 
         cursor.close();
@@ -172,7 +174,7 @@ public class DbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_NAME1,
-                new String[] {COLUMN_LIST_NAME, COLUMN_LIST_SHARED},
+                null,
                 COLUMN_LIST_CREATOR + " =?",
                 new String[] {username},
                 null, null, null);
@@ -187,6 +189,7 @@ public class DbHelper extends SQLiteOpenHelper {
         while(cursor.moveToNext()){
             String listName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_NAME));
             String listShared = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_SHARED));
+            String listUsername = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_CREATOR));
             Boolean isListShared;
             if (listShared.equals("yes"))
                 isListShared = true;
@@ -194,7 +197,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 isListShared = false;
             else
                 isListShared = null;
-            ListElement le = new ListElement(listName, isListShared);
+            ListElement le = new ListElement(listName, isListShared, listUsername);
             userLists.add(le);
         }
         close();
@@ -270,7 +273,6 @@ public class DbHelper extends SQLiteOpenHelper {
 
         close();
     }
-
     public TaskElement insertTask(String item_name, String list_name, String checked, String id) {
         if(!checkItemName(id))
             return null;
@@ -388,6 +390,9 @@ public class DbHelper extends SQLiteOpenHelper {
                     cursor.getColumnIndexOrThrow(COLUMN_LIST_NAME));
             String shared = cursor.getString(
                     cursor.getColumnIndexOrThrow(COLUMN_LIST_SHARED));
+            String listUsername = cursor.getString(
+                    cursor.getColumnIndexOrThrow(COLUMN_LIST_CREATOR));
+
             Boolean listShared;
 
             if(shared.equals("yes"))
@@ -397,11 +402,34 @@ public class DbHelper extends SQLiteOpenHelper {
             else
                 listShared = null;
 
-            namedLists.add(new ListElement(listName, listShared));
+            namedLists.add(new ListElement(listName, listShared, listUsername));
         }
 
         cursor.close();
         close();
         return true;
+    }
+
+    public void deleteSharedLists() {
+        SQLiteDatabase db = getWritableDatabase();
+
+        db.delete(TABLE_NAME1,
+                COLUMN_LIST_SHARED +" =?",
+                new String[] {"yes"});
+
+        close();
+    }
+
+    public void insertLists(List<ListElement> lists) {
+        if(lists != null){
+            for(ListElement i : lists){
+                String shared;
+                if(i.getmShared())
+                    shared = "yes";
+                else
+                    shared = "no";
+                insertList(i.getmNaslov(), i.getmUsername(), shared);
+            }
+        }
     }
 }

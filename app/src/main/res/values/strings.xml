@@ -22,4 +22,5 @@
     <string name="see_shared_lists">SHR LISTS</string>
     <string name="refresh">REFRESH</string>
     <string name="home">HOME</string>
+    <string name="BASE_IP">http://192.168.1.5</string>
 </resources>

@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpHelper {
     private static final int SUCCESS = 200;
@@ -155,6 +157,44 @@ public class HttpHelper {
     }
 
 
+    public List<ListElement> getSharedLists(String listsUrl) throws IOException, JSONException{
+        JSONArray array = getJSONArrayFromURL(listsUrl);
+        if(array == null){
+            return null;
+        }
+        List<ListElement> lists = new ArrayList<>();
+        for(int i = 0; i < array.length(); i++){
+            JSONObject jsonObject = array.getJSONObject(i);
+            lists.add(new ListElement(jsonObject.getString("name"), jsonObject.getBoolean("shared"), jsonObject.getString("creator")));
+        }
+        return lists;
+    }
 
+    public void findUserLists(List<ListElement> userLists, String username, String urlString) throws JSONException, IOException {
+        userLists.clear();
+        JSONArray jsonArray = getJSONArrayFromURL(urlString);
+        for(int i = 0; i < jsonArray.length(); i++){
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            if(jsonObject.getString("name").equals(username)){
+                userLists.add(new ListElement(
+                        jsonObject.getString("name"),
+                        jsonObject.getBoolean("shared"),
+                        jsonObject.getString("creator")));
+            }
+        }
+        //return false;
+    }
 
+    public String findListCreator(String listName, String baseUrl) throws JSONException, IOException {
+        JSONArray jsonArray = getJSONArrayFromURL(baseUrl);
+        for(int i = 0; i < jsonArray.length(); i++){
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            if(jsonObject.getString("name").equals(listName)){
+                Log.d("HTTP HELPER", "CREATOR: " + jsonObject.getString("creator"));
+                Log.d("HTTP HELPER", "USER: " + jsonObject.getString("name"));
+                return jsonObject.getString("creator");
+            }
+        }
+        return null;
+    }
 }

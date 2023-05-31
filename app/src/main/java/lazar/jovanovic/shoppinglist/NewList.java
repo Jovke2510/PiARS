@@ -31,13 +31,15 @@ public class NewList extends AppCompatActivity implements View.OnClickListener {
     DbHelper dbHelper;
     private final String DB_NAME = "database.db";
     HttpHelper httpHelper;
-    public static String POST_LIST = "http://192.168.5.106:3000/lists";
+    public String POST_LIST;
     int flag;
     boolean rt_http;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_list);
+
+        POST_LIST = getString(R.string.BASE_IP) + ":3000/lists";
 
         bOk = findViewById(R.id.naslov_ok);
         naslov = findViewById(R.id.naslov);
@@ -66,6 +68,7 @@ public class NewList extends AppCompatActivity implements View.OnClickListener {
                         break;
                     }
                 }
+                Log.d("NEW LIST ACTIVITY", "bYES: " + Boolean.toString(bYes) + " bNo: " + Boolean.toString(bNo));
             }
         });
 
@@ -90,13 +93,13 @@ public class NewList extends AppCompatActivity implements View.OnClickListener {
                 if(ok_pressed == true){
                     Bundle bundle = getIntent().getExtras();
                     String creator = bundle.getString("creator", "Default");
-                    Boolean rt_db;
                     Log.d("New_List", "Naslov: " + stNaslov +
                             " Creator: " + creator);
                     if(bYes) {
                         Log.d("New_List", "Naslov: " + stNaslov +
                                 " Creator: " + creator);
-                        rt_db = dbHelper.insertList(stNaslov, creator, "yes");
+                        if(!dbHelper.insertList(stNaslov, creator, "yes"))
+                            Toast.makeText(getApplicationContext(), "Database insert failed", Toast.LENGTH_SHORT).show();
                         //Ovde dodati za server
                         new Thread(new Runnable() {
                             @Override
@@ -137,11 +140,10 @@ public class NewList extends AppCompatActivity implements View.OnClickListener {
                                 }
                             }
                         }).start();
-                    }else
-                        rt_db = dbHelper.insertList(stNaslov, creator, "no");
-
-                    if(!rt_db && !rt_http)
-                        Toast.makeText(this, "Smth went wrong with insert", Toast.LENGTH_SHORT).show();
+                    }else if(bNo){
+                        if(!dbHelper.insertList(stNaslov, creator, "no"))
+                            Toast.makeText(getApplicationContext(), "Something went wrong with the insert", Toast.LENGTH_SHORT).show();
+                    }
                     Intent intent = new Intent(this, WelcomeActivity.class);
                     intent.putExtras(bundle);
                     startActivity(intent);
